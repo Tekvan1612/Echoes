@@ -194,6 +194,28 @@
                     renderTransactionTable();
                 }
             });
+
+            // Based on Job Number that Title
+            $('#job_number').on('change', function () {
+                var jobRef = $(this).val();
+                if (jobRef !== "Select Job Number") {
+                    $.ajax({
+                        url: '/get_job_title/',  // Django URL (you'll set this in urls.py)
+                        method: 'GET',
+                        data: {
+                            job_reference_no: jobRef
+                        },
+                        success: function (response) {
+                            $('#job_title').val(response.title);
+                        },
+                        error: function () {
+                            alert('Failed to fetch job title.');
+                        }
+                    });
+                } else {
+                    $('#job_title').val('');
+                }
+            });
         });
     </script>
     <body>
@@ -302,6 +324,11 @@
                                             <label for="job_number">Job Number</label>
                                         </div>
                                     </div>
+                                    <div class="col-xl-4 mb-3">
+                                        {#                                            <label class="form-label">Job Title</label>#}
+                                        <input type="text" class="form-control" id="job_title" name="job_title" readonly
+                                               placeholder="Job Title">
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -310,6 +337,7 @@
                     <div class="card">
                         <div class="card-header">
                             <h4 class="card-title mb-0">Task</h4>
+                            <button id="download-btn" class="btn btn-primary">Download</button>
                         </div><!-- end card header -->
                         <div class="card-body">
                             <div class="table-responsive table-card">
