@@ -6247,6 +6247,85 @@ def update_crew_allocation_delivery(request):
             return JsonResponse({'success': False, 'error': str(e)})
 
     return JsonResponse({'success': False, 'error': 'Invalid request method.'})
+	
+
+def save_composite_rack(request):
+    if request.method == 'POST':
+        try:
+            # Retrieve form data
+            equipment_name = request.POST.get('equipmentName')
+            dimension_h = request.POST.get('dimension_h')
+            dimension_w = request.POST.get('dimension_w')
+            dimension_l = request.POST.get('dimension_l')
+            volume = request.POST.get('volume')
+            weight = request.POST.get('weight')
+            barcode_no = request.POST.get('barcode_no')
+            serial_no = request.POST.get('serial_no')
+            image1 = request.FILES.get('image1')
+            created_by = request.session.get('user_id')
+
+            # Cloudinary upload for the image
+            image_url = None
+            if image1:
+                if image1.size < 4000 or image1.size > 12288:
+                    return JsonResponse({'error': 'Profile photo size must be between 5KB and 12KB.'}, status=400)
+                upload_result = cloudinary.uploader.upload(image1, folder="profilepic/")
+                image_url = upload_result['secure_url']
+
+            # Prepare SQL query to insert data into composite_rack table
+            insert_rack_query = """
+                INSERT INTO public.composite_rack (name, height, width, length, volume, weight, barcode_no, serial_no, image, status, created_by, created_date)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING id
+            """
+            rack_params = [
+                equipment_name,
+                dimension_h,
+                dimension_w,
+                dimension_l,
+                volume,
+                weight,
+                barcode_no,
+                serial_no,
+                image_url if image_url else None,
+                False,
+                created_by,
+                datetime.now()
+            ]
+
+            with connection.cursor() as cursor:
+                # Insert into composite_rack and retrieve the new rack_id
+                cursor.execute(insert_rack_query, rack_params)
+                rack_id = cursor.fetchone()[0]
+
+                # Retrieve and parse component data from the form
+                components_data = request.POST.get('components')  # Get the JSON string from the form
+                if components_data:
+                    parsed_components = json.loads(components_data)  # Parse the JSON string into a list of dictionaries
+
+                    # Insert components into composite_rack_component
+                    if parsed_components:
+                        insert_component_query = """
+                            INSERT INTO public.composite_rack_component (rack_id, component_name, quantity, unit_price, total)
+                            VALUES (%s, %s, %s, %s, %s)
+                        """
+                        component_params = [
+                            (
+                                rack_id,
+                                component['component_name'],
+                                component['quantity'],
+                                component['unit_price'],
+                                component['total']
+                            )
+                            for component in parsed_components
+                        ]
+
+                        cursor.executemany(insert_component_query, component_params)
+
+            return JsonResponse({'status': 'success'})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)})
+    return JsonResponse({'status': 'error', 'message': 'Invalid request'})
+
 
 # Job Summary
 def job_summary(request):
