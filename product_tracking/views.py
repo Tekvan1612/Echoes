@@ -4426,8 +4426,8 @@ def get_equipment_details(request, equipment_id):
                        e.volume, e.hsn_no, e.country_origin, a.image_1, a.image_2, a.image_3,
                        COALESCE(MAX(sd.unit_price), 0) as unit_price, COALESCE(MAX(sd.rental_price), 0) as rental_price
                 FROM equipment_list e
-                JOIN sub_category s ON e.sub_category_id = s.id
-                JOIN equipment_list_attachments a ON e.id = a.equipment_list_id
+                LEFT JOIN sub_category s ON e.sub_category_id = s.id
+                LEFT JOIN equipment_list_attachments a ON e.id = a.equipment_list_id
                 LEFT JOIN stock_details sd ON e.id = sd.equipment_id
                 WHERE e.id = %s
                 GROUP BY e.equipment_name, s.name, e.category_type, e.weight,
