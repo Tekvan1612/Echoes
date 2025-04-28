@@ -1332,15 +1332,15 @@ $(document).on('click', '.edit-list-sub-btn', function() {
     }
 
     // Edit Calculation dimension
-    $('.dimension').on('input', function () {
+    $('.dimension_edit').on('input', function () {
         calculateVolumeEdit();
     });
 
     function calculateVolumeEdit() {
-        var dimension_h = parseFloat(document.getElementById('dimension_h').value);
-        var dimension_w = parseFloat(document.getElementById('dimension_w').value);
-        var dimension_l = parseFloat(document.getElementById('dimension_l').value);
-        var volumeField = document.getElementById('volume');
+        var dimension_h = parseFloat(document.getElementById('dimensionHeight').value);
+        var dimension_w = parseFloat(document.getElementById('dimensionWidth').value);
+        var dimension_l = parseFloat(document.getElementById('dimensionLength').value);
+        var volumeField = document.getElementById('volumeEdit');
 
         if (!isNaN(dimension_h) && !isNaN(dimension_w) && !isNaN(dimension_l)) {
             var volume = dimension_h * dimension_w * dimension_l;
