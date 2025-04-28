@@ -4211,8 +4211,11 @@ def update_equipment_details(request, equipment_id):
             api_secret='t4LpyFrIjqUPJ2stsBvDwHbLcA0'
         )
 
+        if request.method != 'POST':
+            return JsonResponse({'success': False, 'error': 'Invalid request method'})
+
         # Extract form data
-        equipment_name = request.POST.get('equipmentName').upper()
+        equipment_name = request.POST.get('equipmentName', '').upper()
         sub_category_name = request.POST.get('subCategoryName')
         category_type = request.POST.get('categoryType')
         dimension_height = request.POST.get('dimension_h')
@@ -4223,31 +4226,39 @@ def update_equipment_details(request, equipment_id):
         hsn_no = request.POST.get('hsn_no')
         country_origin = request.POST.get('country_origin')
 
-        # Fetch the sub_category_id from the sub_category table
+        # Handle file uploads
+        image1 = request.FILES.get('image1[]')
+        image2 = request.FILES.get('image2[]')
+        image3 = request.FILES.get('image3[]')
+        print("Files received:", request.FILES)
+
         with connection.cursor() as cursor:
+            # Fetch the sub_category_id from the sub_category table
             cursor.execute("""
                 SELECT id FROM public.sub_category WHERE name = %s
             """, [sub_category_name])
-            sub_category_id = cursor.fetchone()
+            sub_category = cursor.fetchone()
 
-            if not sub_category_id:
+            if not sub_category:
                 return JsonResponse({'success': False, 'error': 'Subcategory not found'})
 
-            sub_category_id = sub_category_id[0]  # Get the integer ID
+            sub_category_id = sub_category[0]
 
-            # Handle file uploads independently
-            image1 = request.FILES.get('image1[]')
-            image2 = request.FILES.get('image2[]')
-            image3 = request.FILES.get('image3[]')
-            print("Files received:", request.FILES)
-
-            # Fetch current attachments from the database
+            # Fetch current attachments for this equipment
             cursor.execute("""
-                SELECT image_1, image_2, image_3 FROM public.equipment_list_attachments WHERE equipment_list_id = %s
+                SELECT id, image_1, image_2, image_3
+                FROM public.equipment_list_attachments
+                WHERE equipment_list_id = %s
             """, [equipment_id])
-            current_attachments = cursor.fetchone() or [None, None, None]
-            image_urls = list(current_attachments)
+            existing_attachment = cursor.fetchone()
 
+            image_urls = [None, None, None]
+
+            if existing_attachment:
+                _, current_image1, current_image2, current_image3 = existing_attachment
+                image_urls = [current_image1, current_image2, current_image3]
+
+            # Upload new images if provided
             if image1:
                 try:
                     result = cloudinary.uploader.upload(image1)
@@ -4269,13 +4280,13 @@ def update_equipment_details(request, equipment_id):
                 except Exception as e:
                     return JsonResponse({'success': False, 'error': f"Error uploading Image 3: {str(e)}"})
 
-            # Update the equipment_list table
+            # Update the equipment_list table using your function
             cursor.execute("""
                 SELECT update_equipment_list_func(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             """, [
                 equipment_id,
                 equipment_name,
-                sub_category_id,  # Correct ID being passed
+                sub_category_id,
                 category_type,
                 dimension_height,
                 dimension_width,
@@ -4286,12 +4297,20 @@ def update_equipment_details(request, equipment_id):
                 country_origin
             ])
 
-            # Update `equipment_list_attachments` table
-            cursor.execute("""
-                UPDATE public.equipment_list_attachments
-                SET image_1 = %s, image_2 = %s, image_3 = %s
-                WHERE equipment_list_id = %s
-            """, [image_urls[0], image_urls[1], image_urls[2], equipment_id])
+            # Now update or insert into equipment_list_attachments
+            if existing_attachment:
+                # If exists, update
+                cursor.execute("""
+                    UPDATE public.equipment_list_attachments
+                    SET image_1 = %s, image_2 = %s, image_3 = %s
+                    WHERE equipment_list_id = %s
+                """, [image_urls[0], image_urls[1], image_urls[2], equipment_id])
+            else:
+                # If not exists, insert new
+                cursor.execute("""
+                    INSERT INTO public.equipment_list_attachments (equipment_list_id, image_1, image_2, image_3)
+                    VALUES (%s, %s, %s, %s)
+                """, [equipment_id, image_urls[0], image_urls[1], image_urls[2]])
 
         return JsonResponse({'success': True})
 
