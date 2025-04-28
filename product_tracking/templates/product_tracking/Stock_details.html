@@ -411,17 +411,16 @@
                 }
             });
 
-
+            // Stock Details Tab
             $('#equipment-list').on('click', 'a.list-group-item', function (e) {
                 e.preventDefault();
 
-                // Remove active class from all items
                 $('#equipment-list .list-group-item').removeClass('active');
-
-                // Add active class to the clicked item
                 $(this).addClass('active');
 
                 const equipmentId = $(this).data('id');
+
+                let stockDetailsGlobal = []; // Define globally inside click function
 
                 // Fetch the selected equipment details via AJAX
                 $.ajax({
@@ -430,61 +429,65 @@
                     dataType: "json",
                     success: function (data) {
                         if (data.message) {
-                            // Display the message when no stock details are available
                             $('#equipment-stock-summary').html(`<p>${data.message}</p>`);
-                            $('#stock-details-info').html(''); // Clear stock details
+                            $('#stock-details-info').html('');
                         } else {
+                            stockDetailsGlobal = data.stock_details;
+
                             let stockSummaryHtml = `
-                            <table class="table header-border table-hover verticle-middle">
-                                <thead>
-                                    <tr>
-                                        <th>Vendor Name</th>
-                                        <th>Purchase Date</th>
-                                        <th>Reference No</th>
-                                        <th>Units</th>
-                                        <th>Additional Info</th>
-                                    </tr>
-                                </thead>
-                                <tbody>`;
+                <table class="table header-border table-hover verticle-middle">
+                    <thead>
+                        <tr>
+                            <th>Vendor Name</th>
+                            <th>Purchase Date</th>
+                            <th>Reference No</th>
+                            <th>Units</th>
+                            <th>Additional Info</th>
+                        </tr>
+                    </thead>
+                    <tbody>`;
 
                             $.each(data.stock_summary, function (index, summary) {
                                 stockSummaryHtml += `
-                                    <tr>
-                                        <td>${summary.vendor_name}</td>
-                                        <td>${summary.purchase_date}</td>
-                                        <td>${summary.reference_no}</td>
-                                        <td>${summary.unique_barcode_count}</td>
-                                        <td><button class="btn btn-primary view-details-btn" style="padding: 0.3rem 0.3rem; border-radius: 0.375rem; font-weight: 200; font-size: 12px; line-height: 15px" data-reference-no="${summary.reference_no}">View Details</button></td>
-                                    </tr>`;
+                        <tr>
+                            <td>${summary.vendor_name}</td>
+                            <td>${summary.purchase_date}</td>
+                            <td>${summary.reference_no}</td>
+                            <td>${summary.unique_barcode_count}</td>
+                            <td><button class="btn btn-primary view-details-btn" style="padding: 0.3rem 0.3rem; border-radius: 0.375rem; font-weight: 200; font-size: 12px; line-height: 15px" data-reference-no="${summary.reference_no}">View Details</button></td>
+                        </tr>`;
                             });
 
                             stockSummaryHtml += '</tbody></table>';
                             $('#equipment-stock-summary').html(stockSummaryHtml);
 
-                            // Add event listener to display detailed info when a summary item is clicked
-                            $('#equipment-stock-summary').on('click', '.view-details-btn', function () {
+                            // ⬇️ Move the event listener here ⬇️
+                            $('#equipment-stock-summary').off('click', '.view-details-btn').on('click', '.view-details-btn', function () {
                                 const referenceNo = $(this).data('reference-no');
+                                console.log("Clicked Reference No:", referenceNo);
+                                console.log("Stock Details Global:", stockDetailsGlobal);
                                 let stockDetailsHtml = `
-                                    <div class="stock-details">
-                                        <h5 class="section-title">Stock Details for Reference No: ${referenceNo}</h5>
-                                        <table class="table header-border table-hover verticle-middle">
-                                            <thead>
-                                                <tr>
-                                                    <th>Barcode No</th>
-                                                    <th>Serial No</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>`;
+                        <div class="stock-details">
+                            <h5 class="section-title">Stock Details for Reference No: ${referenceNo}</h5>
+                            <table class="table header-border table-hover verticle-middle">
+                                <thead>
+                                    <tr>
+                                        <th>Barcode No</th>
+                                        <th>Serial No</th>
+                                    </tr>
+                                </thead>
+                                <tbody>`;
 
-                                $.each(data.stock_details, function (index, detail) {
-                                    if (detail.reference_no === referenceNo) {
+                                $.each(stockDetailsGlobal, function (index, detail) {
+                                    if (detail.reference_no == referenceNo) { // <- use only double equals ==
                                         stockDetailsHtml += `
-                                                <tr>
-                                                    <td>${detail.barcode_no}</td>
-                                                    <td>${detail.serial_no}</td>
-                                                </tr>`;
+            <tr>
+                <td>${detail.barcode_no}</td>
+                <td>${detail.serial_no}</td>
+            </tr>`;
                                     }
                                 });
+
 
                                 stockDetailsHtml += '</tbody></table></div>';
                                 $('#stock-details-info').html(stockDetailsHtml);
@@ -496,6 +499,8 @@
                     }
                 });
             });
+
+            
             $.ajax({
                 url: "{% url 'get_categories' %}",
                 method: "GET",
