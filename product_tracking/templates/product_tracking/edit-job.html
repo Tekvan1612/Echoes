@@ -5600,13 +5600,16 @@ body {
                 <div class="job_left" style="width: 400px;">
                     <p><b>Job Title:</b><span> ${response.job.title}</span></p>
                     <p><b>Job Ref:</b><span> ${response.job.job_reference_no}</span></p>
-                    <p><b>Client:</b><span class="customer-details"> ${response.job.client_name}<br>${response.job.address}<br>
-                    ${response.job.state}<br>${response.job.post_code}<br>${response.job.country}</span></p>
+                    <p><b>Client:</b><span class="customer-details"> ${response.job.client_name ?? ''}<br>
+    ${response.job.address ?? ''}<br>
+    ${response.job.state ?? ''}<br>
+    ${response.job.post_code ?? ''}<br>
+    ${response.job.country ?? ''}</span></p>
+<p><b>Client Contact:</b><span> ${response.job.contact_person_number}</span></p>
                 </div>
                 <div class="job_right" style="width: 200px;">
                     <p><b>Venue:</b><span> ${response.job.venue_name}<br/>${response.job.venue_address}</span></p>
-                    <p><b>Sound Engineer:</b><span> ${response.job.contact_person_name}</span></p>
-                    <p><b>Client Contact:</b><span> ${response.job.contact_person_number}</span></p>
+                    <p><b>Sound Engineer:</b><span> ${response.job.contact_person_name ?? ''}</span></p>
                 </div>
             </div>
             ${equipmentDetailsHtml} <!-- Include equipment details here -->
@@ -5983,13 +5986,16 @@ body {
                 <div class="job_left" style="width: 400px;">
                     <p><b>Job Title:</b><span> ${response.job.title}</span></p>
                     <p><b>Job Ref:</b><span> ${response.job.job_reference_no}</span></p>
-                    <p><b>Client:</b><span class="customer-details"> ${response.job.client_name}<br>${response.job.address}<br>
-                    ${response.job.state}<br>${response.job.post_code}<br>${response.job.country}</span></p>
+                    <p><b>Client:</b><span class="customer-details"> ${response.job.client_name ?? ''}<br>
+    ${response.job.address ?? ''}<br>
+    ${response.job.state ?? ''}<br>
+    ${response.job.post_code ?? ''}<br>
+    ${response.job.country ?? ''}</span></p>
+<p><b>Client Contact:</b><span> ${response.job.contact_person_number}</span></p>
                 </div>
                 <div class="job_right" style="width: 200px;">
                     <p><b>Venue:</b><span> ${response.job.venue_name}<br/>${response.job.venue_address}</span></p>
-                    <p><b>Sound Engineer:</b><span> ${response.job.contact_person_name}</span></p>
-                    <p><b>Client Contact:</b><span> ${response.job.contact_person_number}</span></p>
+                    <p><b>Sound Engineer:</b><span> ${response.job.contact_person_name ?? ''}</span></p>
                 </div>
             </div>
 
