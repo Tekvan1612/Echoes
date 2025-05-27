@@ -269,5 +269,6 @@ path('get_driver_list/', views.get_driver_list, name='get_driver_list'),
                   path('get_vehicle_numbers/', views.get_vehicle_numbers, name='get_vehicle_numbers'),
 path('get_job_title/', views.get_job_title, name='get_job_title'),
 path('fetch_equipment_usages/', views.fetch_equipment_usages, name='fetch_equipment_usages'),
-                  path('fetch_transaction_details_usage/', views.fetch_transaction_details_usage, name='fetch_transaction_details_usage'),  
+                  path('fetch_transaction_details_usage/', views.fetch_transaction_details_usage, name='fetch_transaction_details_usage'),
+path('delete_job/', views.delete_job, name='delete_job'),
               ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
