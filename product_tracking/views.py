@@ -7088,4 +7088,25 @@ def fetch_transaction_details_usage(request):
             })
 
     return JsonResponse(response_data)
+
+
+@csrf_exempt
+def delete_job(request):
+    if request.method == 'POST':
+        temp_id = request.POST.get('job_id')
+        if temp_id:
+            try:
+                with connection.cursor() as cursor:
+                    cursor.execute("DELETE FROM temp_transportation_allocation WHERE temp_id = %s", [temp_id])
+                    cursor.execute("DELETE FROM temp_crew_allocation WHERE temp_id = %s", [temp_id])
+                    cursor.execute("DELETE FROM temp_sub_vendor WHERE temp_id = %s", [temp_id])
+                    cursor.execute("DELETE FROM temp_equipment_details WHERE temp_id = %s", [temp_id])
+                    cursor.execute("DELETE FROM temp WHERE id = %s", [temp_id])
+
+                return JsonResponse({'success': True})
+            except Exception as e:
+                print("Delete error:", str(e))
+                return JsonResponse({'success': False, 'error': str(e)})
+
+    return JsonResponse({'success': False, 'error': 'Invalid request'})
 	
