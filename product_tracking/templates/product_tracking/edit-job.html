@@ -5287,7 +5287,7 @@ body {
                     <div class="equipment_left" style="width: 700px;">
                         <p><b>Equipment Title:</b><span> ${response.job.title}</span>:<span>${detail.equipment_detail_id}</span></p>
                         <p><b>Equipment Ref:</b><span> ${detail.equipment_detail_id}</span></p>
-                        <p><b>Location:</b><span> ${detail.incharge}</span></p>
+                        <p><b>Location:</b><span> ${detail.location}</span></p>
                         <p><b>Event Start Date:</b><span> ${detail.equipment_setup_date}</span></p>
                         <p><b>Event End Date:</b><span> ${detail.equipment_rehearsal_date}</span></p>
                     </div>
@@ -5609,7 +5609,7 @@ body {
                 </div>
                 <div class="job_right" style="width: 200px;">
                     <p><b>Venue:</b><span> ${response.job.venue_name}<br/>${response.job.venue_address}</span></p>
-                    <p><b>Sound Engineer:</b><span> ${response.job.contact_person_name ?? ''}</span></p>
+                    <p><b>Sound Engineer:</b><span> ${detail.incharge ?? ''}</span></p>
                 </div>
             </div>
             ${equipmentDetailsHtml} <!-- Include equipment details here -->
