@@ -6092,6 +6092,8 @@ def print_jobs(request):
     print('Final Equipment Data:', equipment_data)
 
     # Fetch the discount and calculate the total after discount
+# Extract the employee name
+    employee_name = equipment_details[0][10] if equipment_details else ''	
     discount = float(job_data['discount']) if job_data['discount'] else 0
     print('Fetch the DISCOUNT:', discount)
     total_after_discount = total_rental_sum - (total_rental_sum * (discount / 100))
@@ -6113,7 +6115,8 @@ def print_jobs(request):
         'total_after_discount': total_after_discount,
         'gst_percentage': gst_percentage,  # GST percentage applied
         'gst_amount': gst_amount,  # GST amount
-        'total_with_gst': total_with_gst  # Final total after applying GST
+        'total_with_gst': total_with_gst,  # Final total after applying GST
+	'employee_name': employee_name
     }
     print('Fetch the response DATA:', response_data)
 
